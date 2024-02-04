@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 
 class RegisterController extends Controller
 {
@@ -18,7 +19,7 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->validationResponse($validator->errors()->toArray());
         }
 
         $user = User::create([
@@ -29,6 +30,9 @@ class RegisterController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json(['token' => $token], 201);
+        return $this->successResponse("registerd successfully", [
+            "user" =>  new UserResource($user),
+            "token" => $token,
+        ], 201);
     }
 }
